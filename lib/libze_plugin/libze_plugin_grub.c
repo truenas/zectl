@@ -112,10 +112,6 @@ libze_plugin_grub_post_activate(libze_handle *lzeh, char const be_name[LIBZE_MAX
  */
 libze_error
 libze_plugin_grub_post_create(libze_handle *lzeh, libze_create_data *create_data) {
-    char be_ds_int[ZFS_MAX_DATASET_NAME_LEN] = "";
-    libze_util_concat(lzeh->env_root, "/", create_data->be_name, ZFS_MAX_DATASET_NAME_LEN, be_ds_int);
-
-
     return update_grub();
 }
 
