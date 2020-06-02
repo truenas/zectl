@@ -1885,6 +1885,7 @@ libze_create(libze_handle *lzeh, libze_create_options *options) {
     libze_error ret = LIBZE_ERROR_SUCCESS;
     create_data cdata;
     create_data boot_pool_cdata;
+    char be_created[ZFS_MAX_DATASET_NAME_LEN] = "";
 
     /* Populate cdata from existing dataset or snap */
     if (options->existing) {
@@ -1974,6 +1975,7 @@ libze_create(libze_handle *lzeh, libze_create_options *options) {
         }
     }
 
+    libze_util_concat(lzeh->env_root, "/", options->be_name, ZFS_MAX_DATASET_NAME_LEN, be_created);
     ret = post_create(lzeh, options, cdata.is_snap);
 
     return ret;
