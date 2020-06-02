@@ -1976,6 +1976,52 @@ libze_create(libze_handle *lzeh, libze_create_options *options) {
     }
 
     libze_util_concat(lzeh->env_root, "/", options->be_name, ZFS_MAX_DATASET_NAME_LEN, be_created);
+
+    /* BE has been created, let's get truenas kernel version from source dataset */
+    nvlist_t *source_props = NULL;
+    if (libze_dataset_props_get(lzeh, &source_props, cdata.source_dataset, TN_PROP_NAMESPACE) != 0) {
+        return libze_error_set(lzeh, LIBZE_ERROR_LIBZFS,
+                               "Failed to retrieve truenas props of %s dataset", cdata.source_dataset);
+    }
+
+    char kernel_version[ZFS_MAXPROPLEN] = "";
+    ret = libze_nvlist_prop_get(lzeh, source_props, kernel_version, TN_KERNEL_PROP, TN_PROP_NAMESPACE);
+    fnvlist_free(source_props);
+
+    if (ret != LIBZE_ERROR_SUCCESS) {
+        fprintf(stderr,
+                "WARNING: Unable to determine kernel version of %s.\n"
+                "BE may not function correctly.\n",
+                cdata.source_dataset);
+        (void) libze_error_clear(lzeh);
+    } else {
+        /* We have truenas kernel version, let's set it as a prop on the newly created BE */
+        nvlist_t *properties = NULL;
+        properties = fnvlist_alloc();
+        if (properties == NULL) {
+            return libze_error_set(lzeh, LIBZE_ERROR_NOMEM,
+                                   "Unable to initialise properties for %s BE.\n",
+                                   be_created);
+        }
+        char kernel_prop[ZFS_MAXPROPLEN] = "";
+        libze_util_concat(TN_PROP_NAMESPACE, ":", TN_KERNEL_PROP, ZFS_MAXPROPLEN, kernel_prop);
+        if (nvlist_add_string(properties, kernel_prop, kernel_version) != 0) {
+            return libze_error_set(lzeh, LIBZE_ERROR_NOMEM,
+                                   "Unable to add kernel version to properties for %s BE.\n",
+                                   be_created);
+        }
+
+        ret = libze_dataset_set(lzeh, be_created, properties);
+        if (ret != LIBZE_ERROR_SUCCESS) {
+            fprintf(stderr,
+                    "WARNING: Unable to set kernel version for %s because of %s.\n"
+                    "BE may not function correctly.\n",
+                    be_created, lzeh->libze_error_message);
+            (void) libze_error_clear(lzeh);
+        }
+        fnvlist_free(properties);
+    }
+
     ret = post_create(lzeh, options, cdata.is_snap);
 
     return ret;
