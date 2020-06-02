@@ -14,7 +14,7 @@
 libze_error
 update_grub() {
     libze_error ret;
-    int ret_grub = system("update-grub");
+    int ret_grub = system("update-grub >/dev/null 2>&1");
     if (ret_grub != 0) {
         ret = LIBZE_ERROR_UNKNOWN;
     } else {
@@ -112,6 +112,7 @@ libze_plugin_grub_post_activate(libze_handle *lzeh, char const be_name[LIBZE_MAX
  */
 libze_error
 libze_plugin_grub_post_create(libze_handle *lzeh, libze_create_data *create_data) {
+
     return update_grub();
 }
 
