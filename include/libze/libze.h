@@ -11,6 +11,8 @@
 #define LIBZE_MAX_PATH_LEN 255
 
 #define ZE_PROP_NAMESPACE "org.zectl"
+#define TN_PROP_NAMESPACE "truenas"
+#define TN_KERNEL_PROP "kernel_version"
 
 /** @enum libze_error
  * Error type
