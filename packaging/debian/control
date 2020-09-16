@@ -5,7 +5,11 @@ Maintainer: Waqar Ahmed <waqarahmedjoyia@live.com>
 Build-Depends:
  debhelper-compat (= 12),
  cmake,
- libzfslinux-dev,
+ libnvpair1,
+ libuutil1,
+ libzfs2,
+ libzfs2-devel,
+ libzpool2,
  pkgconf
 Standards-Version: 4.5.0
 Homepage: https://github.com/johnramsden/zectl
