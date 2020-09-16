@@ -1,6 +1,7 @@
 #ifndef ZECTL_LIBZE_H
 #define ZECTL_LIBZE_H
 
+#define _GNU_SOURCE
 #include "libzfs/libzfs.h"
 
 #include <stddef.h>
