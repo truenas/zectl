@@ -7,9 +7,9 @@ Build-Depends:
  cmake,
  libnvpair3,
  libuutil3,
- libzfs4,
- libzfs4-devel,
- libzpool4,
+ libzfs5,
+ libzfs5-devel,
+ libzpool5,
  pkgconf
 Standards-Version: 4.5.0
 Homepage: https://github.com/johnramsden/zectl
