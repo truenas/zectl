@@ -1394,7 +1394,7 @@ libze_activate(libze_handle *lzeh, libze_activate_options *options) {
         goto err;
     }
 
-    if (mid_activate(lzeh, options, be_zh) != LIBZE_ERROR_SUCCESS) {
+    if ((ret = mid_activate(lzeh, options, be_zh)) != LIBZE_ERROR_SUCCESS) {
         goto err;
     }
 
