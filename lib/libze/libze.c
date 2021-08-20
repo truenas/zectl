@@ -2036,6 +2036,54 @@ typedef struct libze_destroy_cbdata {
     libze_destroy_options *options;
 } libze_destroy_cbdata;
 
+
+typedef struct dependents_cbdata {
+    libze_destroy_cbdata *cbd;
+    zfs_handle_t         *cb_target;
+    nvlist_t             *cb_nvl;
+} dependents_cbdata_t;
+
+
+static int
+promote_dependent_datasets(dependents_cbdata_t *cb)
+{
+    nvpair_t *pair;
+    char *name;
+    pair = nvlist_next_nvpair(cb->cb_nvl, NULL);
+    for ( ; pair != NULL; pair = nvlist_next_nvpair(cb->cb_nvl, pair)) {
+        zfs_handle_t *zhp = zfs_open(cb->cbd->lzeh->lzh, nvpair_name(pair),
+                                     ZFS_TYPE_FILESYSTEM);
+        if (zhp != NULL) {
+            int err;
+            name = zfs_get_name(zhp);
+            err = zfs_promote(zhp);
+            zfs_close(zhp);
+            if (err != 0) {
+                return libze_error_set(cb->cbd->lzeh, LIBZE_ERROR_UNKNOWN,
+                                       "Dataset %s could not be promoted\n", name);
+            }
+        }
+    }
+    return (0);
+}
+
+
+static int
+get_dependents(zfs_handle_t *zhp, void *data){
+    dependents_cbdata_t *cbp = data;
+    const char *tname = zfs_get_name(cbp->cb_target);
+    const char *name = zfs_get_name(zhp);
+    ssize_t tnlen = strlen(tname);
+
+    // We want to make sure the name we have is not a direct descendant of the target BE dataset
+    // and is not a snapshot as well which can be a dependent as well
+    if (!(strncmp(tname, name, tnlen) == 0 && (name[tnlen] == '/' || name[tnlen] == '@'))){
+        fnvlist_add_boolean(cbp->cb_nvl, name);
+    }
+    zfs_close(zhp);
+    return (0);
+}
+
 /**
  * @brief Destroy callback called for each child recursively
  * @param zh Handle of each dataset to dataset
@@ -2045,7 +2093,9 @@ typedef struct libze_destroy_cbdata {
 static int
 libze_destroy_cb(zfs_handle_t *zh, void *data) {
     int ret = 0;
+    const char *tname = zfs_get_name(zh);
     libze_destroy_cbdata *cbd = data;
+    dependents_cbdata_t cb = { 0 };
 
     char const *ds = zfs_get_name(zh);
     if (zfs_is_mounted(zh, NULL)) {
@@ -2056,6 +2106,18 @@ libze_destroy_cb(zfs_handle_t *zh, void *data) {
                                    "Dataset %s is mounted, run with force or unmount dataset\n",
                                    ds);
         }
+    }
+
+    cb.cb_target = zh;
+    cb.cbd = cbd;
+    cb.cb_nvl = fnvlist_alloc();
+    // Retrieve dependent clones of the BE in question
+    zfs_iter_dependents(zh, B_TRUE, get_dependents, &cb);
+    // Promote them as required
+    ret = promote_dependent_datasets(&cb);
+    nvlist_free(cb.cb_nvl);
+    if (ret != 0){
+        return ret;
     }
 
     zfs_handle_t *origin_h = NULL;
