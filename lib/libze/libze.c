@@ -2049,19 +2049,41 @@ promote_dependent_datasets(dependents_cbdata_t *cb)
 {
     nvpair_t *pair;
     char *name;
+    zfs_handle_t *zhp = NULL;
+    uint64_t zhp_num, cur_num;
+
     pair = nvlist_next_nvpair(cb->cb_nvl, NULL);
     for ( ; pair != NULL; pair = nvlist_next_nvpair(cb->cb_nvl, pair)) {
-        zfs_handle_t *zhp = zfs_open(cb->cbd->lzeh->lzh, nvpair_name(pair),
+        zfs_handle_t *czhp = zfs_open(cb->cbd->lzeh->lzh, nvpair_name(pair),
                                      ZFS_TYPE_FILESYSTEM);
+        if (czhp == NULL){
+            continue;
+        }
+
         if (zhp != NULL) {
-            int err;
-            name = zfs_get_name(zhp);
-            err = zfs_promote(zhp);
-            zfs_close(zhp);
-            if (err != 0) {
-                return libze_error_set(cb->cbd->lzeh, LIBZE_ERROR_UNKNOWN,
-                                       "Dataset %s could not be promoted\n", name);
+            // We will retrieve creation timestamps of both datasets in question
+            // and will compare to get the oldest one as that is what we would like
+            // to promote at the end
+            (void) zfs_prop_get_numeric(zhp, ZFS_PROP_CREATION, &zhp_num, NULL, NULL, 0);
+            (void) zfs_prop_get_numeric(czhp, ZFS_PROP_CREATION, &cur_num, NULL, NULL, 0);
+            if (cur_num > zhp_num) {
+                zhp = czhp;
+            } else {
+                zfs_close(czhp);
             }
+        } else {
+            zhp = czhp;
+        }
+    }
+
+    if (zhp != NULL) {
+        int err;
+        name = zfs_get_name(zhp);
+        err = zfs_promote(zhp);
+        zfs_close(zhp);
+        if (err != 0) {
+            return libze_error_set(cb->cbd->lzeh, LIBZE_ERROR_UNKNOWN,
+                                   "Dataset %s could not be promoted\n", name);
         }
     }
     return (0);
