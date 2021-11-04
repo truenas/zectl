@@ -1394,9 +1394,26 @@ libze_activate(libze_handle *lzeh, libze_activate_options *options) {
         goto err;
     }
 
-    if ((ret = mid_activate(lzeh, options, be_zh)) != LIBZE_ERROR_SUCCESS) {
-        goto err;
-    }
+    // We are seeing an issue where likely the system is not able to correctly determine
+    // if the BE in question is mounted or not and zfs mounts it, then we try to mount
+    // it again as it's not expected of ZFS to do this. Before we jump to conclusions, we don't
+    // have a decent reproduction case where we can accurately determine this but what we do
+    // know is that activation fails as zectl tries to mount BE twice. From what we have seen
+    // so far, it likely happens in the following manner:
+    // 1) zfs_prop_set is used to set a mountpoint where zfs likely uses zfs_mount to mount
+    // 2) we explicitly use zfs_mount to mount the BE
+    // Now (1) should not be mounting at all the BE and just setting the dataset prop and from
+    // the source code, unless we have some other race condition / weird bug in checking if dataset
+    // is mounted - zfs is not mounting the BE.
+    //
+    // Moving on, we don't need to run mid activate hooks at all as for the grub plugin they
+    // are a no-op. This is a stop gap solution for now until we are conclusively able to
+    // determine why/how zfs_prop_set thinks that the dataset is actually mounted and tries
+    // to change it's mountpoint.
+
+    // if ((ret = mid_activate(lzeh, options, be_zh)) != LIBZE_ERROR_SUCCESS) {
+    //   goto err;
+    // }
 
     if (zpool_set_prop(lzeh->pool_zhdl, "bootfs", be_ds) != 0) {
         ret = libze_error_set(lzeh, LIBZE_ERROR_UNKNOWN,
