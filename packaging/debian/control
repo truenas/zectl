@@ -5,6 +5,7 @@ Maintainer: Waqar Ahmed <waqarahmedjoyia@live.com>
 Build-Depends:
  debhelper-compat (= 12),
  cmake,
+ libbsd-dev,
  libnvpair3,
  libuutil3,
  libzfs5,
