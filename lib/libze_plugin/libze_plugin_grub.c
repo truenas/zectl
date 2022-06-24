@@ -158,3 +158,15 @@ libze_plugin_grub_post_rename(libze_handle *lzeh, char const be_name_old[LIBZE_M
                               char const be_name_new[LIBZE_MAX_PATH_LEN]) {
     return update_grub();
 }
+
+/**
+ * @brief Pre snapshot hook
+ *
+ * @param[in,out] lzeh   libze handle
+ * @param[in] snap_data  Snapshot related data
+ * @return @p LIBZE_ERROR_SUCCESS on success
+ */
+libze_error
+libze_plugin_grub_pre_snapshot(libze_handle *lzeh, libze_snap_data *snap_data) {
+    return LIBZE_ERROR_SUCCESS;
+}
