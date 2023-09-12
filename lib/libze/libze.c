@@ -1886,8 +1886,8 @@ err:
 libze_error
 libze_create(libze_handle *lzeh, libze_create_options *options) {
     libze_error ret = LIBZE_ERROR_SUCCESS;
-    create_data cdata;
-    create_data boot_pool_cdata;
+    create_data cdata = (create_data){ .recursive = options->recursive };
+    create_data boot_pool_cdata = { 0 };
     char be_created[ZFS_MAX_DATASET_NAME_LEN] = "";
 
     /* Populate cdata from existing dataset or snap */
