@@ -1605,7 +1605,7 @@ libze_clone(libze_handle *lzeh, char source_root[static 1], char source_snap_suf
         if (libze_util_suffix_after_string(source_root, ds_name, ZFS_MAX_DATASET_NAME_LEN,
                                            be_child_buf) == 0) {
             if (strlen(be_child_buf) > 0) {
-                if (libze_util_concat(be, be_child_buf, "/", ZFS_MAX_DATASET_NAME_LEN,
+                if (libze_util_concat(be, "/", be_child_buf, ZFS_MAX_DATASET_NAME_LEN,
                                       ds_child_buf) != LIBZE_ERROR_SUCCESS) {
                     ret = libze_error_set(lzeh, LIBZE_ERROR_MAXPATHLEN,
                                           "Requested child clone exceeds max length %d\n",
