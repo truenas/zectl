@@ -865,7 +865,7 @@ temp_unmount_be(libze_handle *lzeh, char const *tmp_dirname, zfs_handle_t *be_zh
         ret = libze_error_prepend(lzeh, LIBZE_ERROR_UNKNOWN, "Failed to unmount %s", tmp_dirname);
     } else {
         rmdir(tmp_dirname);
-        if ((zfs_prop_set_list(be_zh, props) != 0)) {
+        if ((zfs_prop_set_list(be_zh, props, 0) != 0)) {
             ret = libze_error_prepend(lzeh, LIBZE_ERROR_UNKNOWN, "Failed to unset mountpoint %s:\n",
                                       tmp_dirname);
         }
@@ -1260,7 +1260,7 @@ libze_dataset_set(libze_handle *lzeh, const char *dataset, nvlist_t *properties)
                                dataset);
     }
 
-    if (zfs_prop_set_list(be_root_zh, properties) != 0) {
+    if (zfs_prop_set_list(be_root_zh, properties, 0) != 0) {
         ret = libze_error_set(lzeh, LIBZE_ERROR_UNKNOWN, "Failed to set properties\n");
     }
 
