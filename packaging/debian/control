@@ -8,9 +8,9 @@ Build-Depends:
  libbsd-dev,
  libnvpair3,
  libuutil3,
- libzfs5,
- libzfs5-devel,
- libzpool5,
+ libzfs6,
+ libzfs6-devel,
+ libzpool6,
  pkgconf
 Standards-Version: 4.5.0
 Homepage: https://github.com/johnramsden/zectl
