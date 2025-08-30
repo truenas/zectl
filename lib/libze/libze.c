@@ -592,7 +592,7 @@ libze_nvlist_prop_get(libze_handle *lzeh, nvlist_t *props, char *result_prop, ch
         return libze_error_set(lzeh, LIBZE_ERROR_UNKNOWN, "Property nvlist set incorrectly.\n");
     }
 
-    char *string_prop = NULL;
+    const char *string_prop = NULL;
     if (nvpair_value_string(prop, &string_prop) != 0) {
         return libze_error_set(lzeh, LIBZE_ERROR_UNKNOWN,
                                "Property nvlist value is wrong type. Should be a string.\n");

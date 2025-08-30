@@ -905,9 +905,9 @@ libze_plugin_systemdboot_post_activate(libze_handle *lzeh, char const be_name[LI
  *         @p LIBZE_ERROR_MAXPATHLEN if @p LIBZE_MAX_PATH_LEN is exceeded for @p loader_buf
  */
 static libze_error
-form_loader_entry_path(char const efi_mountpoint[LIBZE_MAX_PATH_LEN],
-                       char const middle_dir[LIBZE_MAX_PATH_LEN],
-                       char const be_name[LIBZE_MAX_PATH_LEN],
+form_loader_entry_path(const char *efi_mountpoint,
+                       const char *middle_dir,
+                       const char *be_name,
                        char loader_buf[LIBZE_MAX_PATH_LEN]) {
 
     int ret = snprintf(loader_buf, LIBZE_MAX_PATH_LEN, "%s/%s/%s-%s", efi_mountpoint, middle_dir,
@@ -1080,10 +1080,10 @@ done:
  *         @p LIBZE_ERROR_UNKNOWN upon file could not be accessed
  */
 static libze_error
-replace_be_name(libze_handle *lzeh, char const be_name[ZFS_MAX_DATASET_NAME_LEN],
-                char const active_be[ZFS_MAX_DATASET_NAME_LEN],
-                char const filename[LIBZE_MAX_PATH_LEN],
-                char const new_filename[LIBZE_MAX_PATH_LEN]) {
+replace_be_name(libze_handle *lzeh, const char *be_name,
+                const char *active_be,
+                const char *filename,
+                const char *new_filename) {
 
     libze_error ret = LIBZE_ERROR_SUCCESS;
 
